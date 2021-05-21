@@ -10,20 +10,20 @@
 
 void takeFile(char msg[], char namez[]){
   	char totalfile[1024];
-  	strcpy(totalfile, "/home/solxius/Desktop/Sisop/Modul2/Client/");
-  	strcat(totalfile, namez);
+  	strcpy(totalfile, namez);
   	
 	FILE *fp;
 	fp = fopen (totalfile, "w");
 	fprintf(fp, "%s", msg);
 	fclose(fp);
+	puts("File terdownload");
 }
 
 int main(int argc , char *argv[])
 {
 	int sock, valread, choice;
 	struct sockaddr_in server;
-	char message[1000] , server_reply[1024] , username[1024], pass[1024], temp[1024];
+	char message[1000] , server_reply[5000] , username[1024], pass[1024], temp[1024];
 	
 	//Create socket
 	sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -68,7 +68,7 @@ int main(int argc , char *argv[])
         strcat(username, ":");
         strcat(username, pass);
         send(sock, username, strlen(username), 0);
-        memset(server_reply, 0, 1024);
+        memset(server_reply, 0, 5000);
         if( recv(sock, server_reply, 1024 , 0) < 0)
 		{
 			puts("recv failed");
@@ -120,7 +120,8 @@ int main(int argc , char *argv[])
     	screen2:;
     	char sended[1024], temp[1024], choice2[15];
     	memset(sended, 0, 1024);
-    	printf("WELCOME TO SERVER BUKU JAMED\nWatchu wanna do?\n-add\n-download\n-see\nChoice: ");
+    	memset(server_reply, 0, 5000);
+    	printf("\n\nWELCOME TO SERVER BUKU JAMED\nWatchu wanna do?\n-add\n-download\n-delete\n-see\n-find\nChoice: ");
     	scanf("%s", choice2);
     	if(strcmp(choice2, "add")==0){
     		strcpy(sended, "a \n");
@@ -177,23 +178,59 @@ int main(int argc , char *argv[])
     		printf("What file would you like to download: ");
     		scanf("%s", temp);
     		strcat(sended, temp);
+   
+    		if( send(sock, sended, strlen(sended), 0) < 0)
+		    {
+		        puts("Send failed");
+		        return 1;
+		    }
+		    if( recv(sock, server_reply , 5000 , 0) < 0)
+			{
+				puts("recv failed");
+			}
+			char sumn[10];
+			strcpy(sumn, server_reply);
+			
+			puts("b4here");
+			if(strcmp(sumn, "wrong")==0){
+				puts("Tidak ada file tersebut.\n");
+				goto screen2;
+			}
+			else{
+				send(sock, "go", 2, 0);
+				if( recv(sock, server_reply , 5000 , 0) < 0)
+				{
+					puts("recv failed");
+				}
+				puts("here");
+				takeFile(server_reply, temp);
+			}
+		    goto screen2;
+    	}
+    	else if(strcmp(choice2, "delete")==0){
+    		strcpy(sended, "z ");
+    		printf("What file would you like to delete: ");
+    		scanf("%s", temp);
+    		strcat(sended, temp);
     		
     		if( send(sock, sended, strlen(sended), 0) < 0)
 		    {
 		        puts("Send failed");
 		        return 1;
 		    }
-		    if( recv(sock, server_reply , 1024 , 0) < 0)
+    		if( recv(sock, server_reply , 5000 , 0) < 0)
 			{
 				puts("recv failed");
 			}
+			
 			if(strcmp(server_reply, "wrong")==0){
-				puts("Tidak ada file tersebut.");
+				puts("Tidak ada file tersebut.\n");
+				goto screen2;
 			}
 			else{
-				takeFile(server_reply, temp);
+				puts("File telah dihapus.\n");
+				goto screen2;
 			}
-		    goto screen2;
     	}
     	else if(strcmp(choice2, "see")==0){
     		if( send(sock, "see", 3, 0) < 0)
@@ -201,6 +238,63 @@ int main(int argc , char *argv[])
 		        puts("Send failed");
 		        return 1;
 		    }
+		    
+		    if( recv(sock, server_reply , 5000 , 0) < 0)
+			{
+				puts("recv failed");
+			}
+			char sumn[10];
+			strcpy(sumn, server_reply);
+			
+			if(strcmp(sumn, "wrong")==0){
+				puts("Files.tsv kosong.\n");
+				goto screen2;
+			}
+			else{
+				send(sock, "go", 2, 0);
+				if( recv(sock, server_reply , 5000 , 0) < 0)
+				{
+					puts("recv failed");
+				}
+				printf("%s\n", server_reply);
+				goto screen2;
+			}
+    	}
+    	else if(strcmp(choice2, "find")==0){
+    		strcpy(sended, "f ");
+    		printf("What would you like to find: ");
+    		scanf("%s", temp);
+    		strcat(sended, temp);
+    		
+    		if( send(sock, sended, strlen(sended), 0) < 0)
+		    {
+		        puts("Send failed");
+		        return 1;
+		    }
+		    
+		    if( recv(sock, server_reply , 5000 , 0) < 0)
+			{
+				puts("recv failed");
+			}
+			char sumn[10];
+			strcpy(sumn, server_reply);
+			
+			if(strcmp(sumn, "wrong")==0){
+				puts("Tidak ditemukan.\n");
+				goto screen2;
+			}
+			else{
+				send(sock, "go", 2, 0);
+				if( recv(sock, server_reply , 5000 , 0) < 0)
+				{
+					puts("recv failed");
+				}
+				printf("%s\n", server_reply);
+				goto screen2;
+			}
+    	}
+    	else{
+    		goto screen2;
     	}
     }
 	

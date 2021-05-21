@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-char akuns[200][1024] = {0}, tosend[10000];
+char akuns[200][1024] = {0}, tosend[5000], filea[100][50], fileb[100][50], filec[100][100], filed[100][50], filee[100][50], logined[200];
 int akuncount = 0, filecount = 0;
 bool someone = false;
 
@@ -35,6 +35,7 @@ bool loginAccount(char msg[]){
 	}
 	for(int j=0; j<akuncount; j++){
 		if(strcmp(akuns[j], checker)==0){
+			strcpy(logined, checker);
 			return true;
 		}
 	}
@@ -51,8 +52,53 @@ void addFile(char msg[]){
 	FILE *tsvmake;
     tsvmake = fopen("files.tsv", "a");
     fprintf(tsvmake, "%s", fullz);
+    
+    char aa[50], bb[50], cc[100], dd[50], ee[50];
+    memset(aa, 0, 50);
+    memset(bb, 0, 50);
+    memset(cc, 0, 100);
+    memset(dd, 0, 50);
+    memset(ee, 0, 50);
+    	
+    	sscanf(fullz, "%s\t%s\t%s\n", aa, bb, cc);
+		strcpy(filea[filecount], aa);
+		strcpy(fileb[filecount], bb);
+		strcpy(filec[filecount], cc);
+		printf("%s\n", filec[filecount]);
+		
+		int dcounter = 0;
+		    for(int i=0; i<strlen(cc); i++){
+		    	if(cc[i]=='/'){
+		    		memset(dd, 0, 50);
+		    		dcounter=0;
+		    		continue;
+		    	}
+		    	dd[dcounter]=cc[i];
+		    	dcounter++;
+		    }
+			
+			strcpy(filed[filecount], dd);
+			
+			int ecounter = 0;
+		    for(int i=0; i<strlen(dd); i++){
+		    	if(dd[i]=='.'){
+		    		memset(ee, 0, 50);
+		    		ecounter=0;
+		    		continue;
+		    	}
+		    	ee[ecounter]=dd[i];
+		    	ecounter++;
+		    }
+			
+			strcpy(filee[filecount], ee);
+			
+	
     fclose(tsvmake); 
    
+    FILE *filez1;
+	filez1 = fopen("running.log", "a+");
+	fprintf(filez1, "Tambah : %s (%s)\n", filed[filecount], logined);
+	fclose(filez1);
 			   
 	filecount++;
     return;   
@@ -61,15 +107,15 @@ void addFile(char msg[]){
 void takeFile(char msg[], char namez[]){
  	const char ch = '/';
   	char *ret;
-  	char aa[1024];
-  	memset(aa, 0, 1024);
+  	char aa[100];
+  	memset(aa, 0, 100);
 
   	ret = strrchr(namez, ch);
   	for(int j=1; j<strlen(ret); j++){
 			aa[j-1]=ret[j];
 	}
   	
-  	char totalfile[1024];
+  	char totalfile[100];
   	strcpy(totalfile, "/home/solxius/Desktop/Sisop/Modul3/Server/FILES/");
   	strcat(totalfile, aa);
   	
@@ -85,49 +131,163 @@ bool downloadFile(char msg[]){
 	for(int i=2; i<strlen(msg); i++){
 		fullz[i-2]=msg[i];
 	}
+	puts("beforehere");
 	
-	char aa[1024];
-	int flag=0;
-	FILE *tsvmake;
-    tsvmake = fopen("files.tsv", "a+");
-	while(fscanf(tsvmake, "%[^\n]\n", aa) != EOF){
-			   
-		if(strstr(aa, fullz)){
-			flag = 1;
-			break;
+	for(int i=0; i<filecount; i++){
+		if(strcmp(fullz, filed[i])==0){
+			char pathz[200];
+			strcpy(pathz, "FILES/");
+			strcat(pathz, fullz);
+			FILE *filez;
+			char perline[1024];
+			memset(tosend, 0, 5000);
+			memset(perline, 0, 1024);
+			puts("untilhere");
+			filez = fopen(pathz, "a+");
+			while(fscanf(filez, "%[^\n]\n", perline) != EOF)
+			{
+				strcat(tosend, perline);
+				strcat(tosend, "\n");
+			}
+			fclose(filez);
+			puts("enduntilhere");
+			return true;
 		}
 	}
-	fclose(tsvmake);
-	
-	if(flag==0){
-		return false;
-	}
-	else{
-		char pathz[200];
-		strcpy(pathz, "/home/solxius/Desktop/Sisop/Modul3/Client/FILES/");
-		strcat(pathz, aa);
-		FILE *filez;
-		char perline[1024];
-		memset(tosend, 0, 5000);
-		memset(perline, 0, 1024);
-		filez = fopen(pathz, "a+");
-		while(fscanf(filez, "%[^\n]\n", perline) != EOF)
-		{
-			strcat(tosend, perline);
-			strcat(tosend, "\n");
-		}
-		fclose(filez);
-		return true;
-	}
+	puts("false");
+	return false;
 	
 }
 
-void seeFile(){
-	memset(tosend, 0, 5000);
-	while(fscanf(tsvmake, "%[^\t]\t%[^\t]\t%[^\n]\n", aa, bb, cc) != EOF){
-		
+bool seeFile(){
+	if (filecount==0){
+		return false;
 	}
+
+	for(int i=0; i<filecount; i++){
+		strcat(tosend, "\nNama: ");
+		char abc[50];
+		memset(abc, 0, 50);
+		int counts=0;
+		for(int j=0; j<strlen(filed[i]); j++){
+			if(filed[i][j]=='.'){
+				break;
+			}
+			abc[counts]=filed[i][j];
+			counts++;
+		}
+		strcat(tosend, abc);
+		
+		strcat(tosend, "\nPublisher: ");
+		strcat(tosend, filea[i]);
+		
+		strcat(tosend, "\nTahun publishing: ");
+		strcat(tosend, fileb[i]);
+		
+		strcat(tosend, "\nEkstensi File : ");
+		strcat(tosend, filee[i]);
+		
+		strcat(tosend, "\nFilepath : ");
+		strcat(tosend, filec[i]);
+		
+		strcat(tosend, "\n");
+	}
+	return true;
+
 }
+
+bool deleteFile(char msg[]){
+	char fullz[strlen(msg)];
+	memset(fullz, 0, strlen(msg));
+	for(int i=2; i<strlen(msg); i++){
+		fullz[i-2]=msg[i];
+	}
+	
+	for(int i=0; i<filecount; i++){
+		if(strcmp(fullz, filed[i])==0){
+			char newname[300] = {0}, oldname[300] = {0};
+			sprintf(newname, "/home/solxius/Desktop/Sisop/Modul3/Server/FILES/old-%s", filed[i]);
+			sprintf(oldname, "/home/solxius/Desktop/Sisop/Modul3/Server/FILES/%s", filed[i]);
+			rename(oldname, newname);
+			
+			filecount--;
+			for (int j=i; j<filecount; j++){
+				strcpy(filea[j], filea[j+1]);
+				strcpy(fileb[j], fileb[j+1]);
+				strcpy(filec[j], filec[j+1]);
+				strcpy(filed[j], filed[j+1]);
+				strcpy(filee[j], filee[j+1]);
+			}
+			
+			remove("files.tsv");
+			FILE *tsvmake;
+			tsvmake = fopen("files.tsv", "a+");
+			for (int j=0; j<filecount; j++){
+				fprintf(tsvmake, "%s\t%s\t%s\n", filea[j], fileb[j], filec[j]);
+			}
+			fclose(tsvmake);
+			
+			FILE *filez1;
+			filez1 = fopen("running.log", "a+");
+			fprintf(filez1, "Hapus : %s (%s)\n", filed[i], logined);
+			fclose(filez1);
+			
+			return true;
+		}
+	}
+	puts("false");
+	return false;
+	
+}
+
+bool findFile(char msg[]){
+	bool checkz = false;
+	char abc[50];
+	
+	char fullz[strlen(msg)];
+	memset(fullz, 0, strlen(msg));
+	for(int i=2; i<strlen(msg); i++){
+		fullz[i-2]=msg[i];
+	}
+	
+	for(int i=0; i<filecount; i++){
+		memset(abc, 0, 50);
+		int counts=0;
+		for(int j=0; j<strlen(filed[i]); j++){
+			if(filed[i][j]=='.'){
+				break;
+			}
+			abc[counts]=filed[i][j];
+			counts++;
+		}
+		
+		if (strstr(abc, fullz) != NULL){
+		
+			strcat(tosend, "\nNama: ");
+			strcat(tosend, abc);
+			
+			strcat(tosend, "\nPublisher: ");
+			strcat(tosend, filea[i]);
+			
+			strcat(tosend, "\nTahun publishing: ");
+			strcat(tosend, fileb[i]);
+			
+			strcat(tosend, "\nEkstensi File : ");
+			strcat(tosend, filee[i]);
+			
+			strcat(tosend, "\nFilepath : ");
+			strcat(tosend, filec[i]);
+			
+			strcat(tosend, "\n");
+		
+			checkz = true;
+		}
+	}
+	
+	return checkz;
+
+}
+
 
 int main(int argc , char *argv[])
 {
@@ -170,15 +330,63 @@ int main(int argc , char *argv[])
     }
     fclose(filez);
     
+    FILE *filez1;
+    filez1 = fopen("running.log", "a+");
+    fclose(filez1);
+    
     
     FILE *tsvmake;
-    char aa[500], bb[500], cc[500];
+    char aa[50], bb[50], cc[100], dd[50], ee[50];
     tsvmake = fopen("files.tsv", "a+");
-    if(tsvmake == NULL){
-    	fprintf(tsvmake, "publisher\ttahun publikasi\tpath file");
-    }
+    	memset(aa, 0, 50);
+    	memset(bb, 0, 50);
+    	memset(cc, 0, 100);
+    	memset(dd, 0, 50);
+    	memset(ee, 0, 50);
+    	while(fscanf(tsvmake, "%s\t%s\t%s\n", aa, bb, cc) != EOF) {
+			strcpy(filea[filecount], aa);
+		    strcpy(fileb[filecount], bb);
+		    strcpy(filec[filecount], cc);
+		    
+		    int dcounter = 0;
+		    for(int i=0; i<strlen(cc); i++){
+		    	if(cc[i]=='/'){
+		    		memset(dd, 0, 50);
+		    		dcounter=0;
+		    		continue;
+		    	}
+		    	dd[dcounter]=cc[i];
+		    	dcounter++;
+		    }
+			
+			strcpy(filed[filecount], dd);
+			
+			int ecounter = 0;
+		    for(int i=0; i<strlen(dd); i++){
+		    	if(dd[i]=='.'){
+		    		memset(ee, 0, 50);
+		    		ecounter=0;
+		    		continue;
+		    	}
+		    	ee[ecounter]=dd[i];
+		    	ecounter++;
+		    }
+			
+			strcpy(filee[filecount], ee);
+	
+		    filecount++;
+		    memset(aa, 0, 50);
+			memset(bb, 0, 50);
+			memset(cc, 0, 100);
+			memset(dd, 0, 50);
+			memset(ee, 0, 50);
+		}
 
     fclose(tsvmake);
+    
+    for(int i=0; i<filecount; i++){
+			printf("%d %s %s %s %s %s \n", i, filea[i], fileb[i], filec[i], filed[i], filee[i]);
+	}
     
     int result = mkdir("/home/solxius/Desktop/Sisop/Modul3/Server/FILES", 0777);
 	
@@ -222,7 +430,7 @@ void *connection_handler(void *socket_desc)
 	//Get the socket descriptor
 	int sock = *(int*)socket_desc;
 	int read_size;
-	char *message , client_message[1024], apple[100];
+	char *message , client_message[5000], apple[100];
 	
 	if(someone){
 		send(sock, "no", 2, 0 );
@@ -234,7 +442,8 @@ void *connection_handler(void *socket_desc)
 	send(sock, "ye", 2, 0 );
 	
 	someone = true;
-	memset(client_message, 0, 1024);
+	memset(client_message, 0, 5000);
+	memset(tosend, 0, 5000);
 	
 	//Receive a message from client
 	while( (read_size = recv(sock , client_message , 1024 , 0)) > 0 )
@@ -264,17 +473,53 @@ void *connection_handler(void *socket_desc)
 		}
 		else if(client_message[0]=='d'){
 			if(downloadFile(client_message)){
+				send(sock, "right", 5, 0);
+				recv(sock, client_message, 5000, 0);
+				puts("sending message");
 				send(sock, tosend, strlen(tosend), 0);
 			}
-			send(sock, "wrong", 5, 0);
+			else{
+				puts("sending wrong");
+				send(sock, "wrong", strlen("wrong"), 0);
+			}
+		}
+		else if(client_message[0]=='z'){
+			if(deleteFile(client_message)){
+				puts("sending right");
+				send(sock, "right", 5, 0);
+			}
+			else{
+				puts("sending wrong");
+				send(sock, "wrong", strlen("wrong"), 0);
+			}
 		}
 		else if(client_message[1]=='e'){
-			if(downloadFile(client_message)){
+			if(seeFile(client_message)){
+				send(sock, "right", 5, 0);
+				recv(sock, client_message, 5000, 0);
+				puts("sending logs");
 				send(sock, tosend, strlen(tosend), 0);
 			}
-			send(sock, "wrong", 5, 0);
+			else {
+				puts("sending wrong");
+				send(sock, "wrong", 5, 0);
+			}
 		}
-		memset(client_message, 0, 1024);
+		else if(client_message[0]=='f'){
+			if(findFile(client_message)){
+				puts("found");
+				send(sock, "right", 5, 0);
+				recv(sock, client_message, 5000, 0);
+				puts("sending logs");
+				send(sock, tosend, strlen(tosend), 0);
+			}
+			else {
+				puts("sending wrong");
+				send(sock, "wrong", 5, 0);
+			}
+		}
+		memset(client_message, 0, 5000);
+		memset(tosend, 0, 5000);
 	}
 	
 	if(read_size == 0){

@@ -44,11 +44,9 @@ int main(int argc , char *argv[])
 		return 1;
 	}
 	
+	puts("Please wait.\n");
+	
 	recv(sock , server_reply , 1024 , 0);
-	if(strcmp(server_reply, "no")==0){
-		puts("Currently in use\n");
-		return 0;
-	}
 	
 	puts("Connected\n");
 	

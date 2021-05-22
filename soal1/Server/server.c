@@ -432,13 +432,7 @@ void *connection_handler(void *socket_desc)
 	int read_size;
 	char *message , client_message[5000], apple[100];
 	
-	if(someone){
-		send(sock, "no", 2, 0 );
-		puts("Client disconnected because currently in use");
-		fflush(stdout);
-		free(socket_desc);
-		return 0;
-	}
+	while(someone);
 	send(sock, "ye", 2, 0 );
 	
 	someone = true;

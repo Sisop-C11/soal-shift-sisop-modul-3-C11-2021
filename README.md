@@ -372,3 +372,58 @@ while(fscanf(filez, "%s\n", perfile) != EOF)
 fclose(filez)
 ```
 - Ini untuk menyimpan ke database username dan password yang sudah disimpan di akun.txt di sesi sebelumnya.
+
+**(b)**
+```c
+    FILE *tsvmake;
+    char aa[50], bb[50], cc[100], dd[50], ee[50];
+    tsvmake = fopen("files.tsv", "a+");
+    	memset(aa, 0, 50);
+    	memset(bb, 0, 50);
+    	memset(cc, 0, 100);
+    	memset(dd, 0, 50);
+    	memset(ee, 0, 50);
+    	while(fscanf(tsvmake, "%s\t%s\t%s\n", aa, bb, cc) != EOF) {
+			strcpy(filea[filecount], aa);
+		    strcpy(fileb[filecount], bb);
+		    strcpy(filec[filecount], cc);
+		    
+		    int dcounter = 0;
+		    for(int i=0; i<strlen(cc); i++){
+		    	if(cc[i]=='/'){
+		    		memset(dd, 0, 50);
+		    		dcounter=0;
+		    		continue;
+		    	}
+		    	dd[dcounter]=cc[i];
+		    	dcounter++;
+		    }
+			
+			strcpy(filed[filecount], dd);
+			
+			int ecounter = 0;
+		    for(int i=0; i<strlen(dd); i++){
+		    	if(dd[i]=='.'){
+		    		memset(ee, 0, 50);
+		    		ecounter=0;
+		    		continue;
+		    	}
+		    	ee[ecounter]=dd[i];
+		    	ecounter++;
+		    }
+			
+			strcpy(filee[filecount], ee);
+	
+		    filecount++;
+		    memset(aa, 0, 50);
+			memset(bb, 0, 50);
+			memset(cc, 0, 100);
+			memset(dd, 0, 50);
+			memset(ee, 0, 50);
+		}
+
+    fclose(tsvmake);
+```
+https://user-images.githubusercontent.com/68369091/119258609-a899d400-bbf4-11eb-9baf-c992d04fe801.mp4
+
+

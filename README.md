@@ -779,9 +779,214 @@ else if(strcmp(choice2, "delete")==0){
 
 
 **(f)**
+server.c
 ```c
+bool seeFile(){
+	if (filecount==0){
+		return false;
+	}
 
+	for(int i=0; i<filecount; i++){
+		strcat(tosend, "\nNama: ");
+		char abc[50];
+		memset(abc, 0, 50);
+		int counts=0;
+		for(int j=0; j<strlen(filed[i]); j++){
+			if(filed[i][j]=='.'){
+				break;
+			}
+			abc[counts]=filed[i][j];
+			counts++;
+		}
+		strcat(tosend, abc);
+		
+		strcat(tosend, "\nPublisher: ");
+		strcat(tosend, filea[i]);
+		
+		strcat(tosend, "\nTahun publishing: ");
+		strcat(tosend, fileb[i]);
+		
+		strcat(tosend, "\nEkstensi File : ");
+		strcat(tosend, filee[i]);
+		
+		strcat(tosend, "\nFilepath : ");
+		strcat(tosend, filec[i]);
+		
+		strcat(tosend, "\n");
+	}
+	return true;
+
+}
+
+else if(client_message[1]=='e'){
+			if(seeFile(client_message)){
+				send(sock, "right", 5, 0);
+				recv(sock, client_message, 5000, 0);
+				puts("sending logs");
+				send(sock, tosend, strlen(tosend), 0);
+			}
+			else {
+				puts("sending wrong");
+				send(sock, "wrong", 5, 0);
+			}
+		}
 ```
+
+client.c
+```c
+else if(strcmp(choice2, "see")==0){
+    		if( send(sock, "see", 3, 0) < 0)
+		    {
+		        puts("Send failed");
+		        return 1;
+		    }
+		    
+		    if( recv(sock, server_reply , 5000 , 0) < 0)
+			{
+				puts("recv failed");
+			}
+			char sumn[10];
+			strcpy(sumn, server_reply);
+			
+			if(strcmp(sumn, "wrong")==0){
+				puts("Files.tsv kosong.\n");
+				goto screen2;
+			}
+			else{
+				send(sock, "go", 2, 0);
+				if( recv(sock, server_reply , 5000 , 0) < 0)
+				{
+					puts("recv failed");
+				}
+				printf("%s\n", server_reply);
+				goto screen2;
+			}
+    	}
+```
+
+- Untuk see, kita tinggal mengirim isi array database yang kita punya dan sudah kita process dari sebelumnya, dan mengirimnya ke client.
+
+**(g)**
+server.c
+```c
+bool findFile(char msg[]){
+	bool checkz = false;
+	char abc[50];
+	
+	char fullz[strlen(msg)];
+	memset(fullz, 0, strlen(msg));
+	for(int i=2; i<strlen(msg); i++){
+		fullz[i-2]=msg[i];
+	}
+	
+	for(int i=0; i<filecount; i++){
+		memset(abc, 0, 50);
+		int counts=0;
+		for(int j=0; j<strlen(filed[i]); j++){
+			if(filed[i][j]=='.'){
+				break;
+			}
+			abc[counts]=filed[i][j];
+			counts++;
+		}
+		
+		if (strstr(abc, fullz) != NULL){
+		
+			strcat(tosend, "\nNama: ");
+			strcat(tosend, abc);
+			
+			strcat(tosend, "\nPublisher: ");
+			strcat(tosend, filea[i]);
+			
+			strcat(tosend, "\nTahun publishing: ");
+			strcat(tosend, fileb[i]);
+			
+			strcat(tosend, "\nEkstensi File : ");
+			strcat(tosend, filee[i]);
+			
+			strcat(tosend, "\nFilepath : ");
+			strcat(tosend, filec[i]);
+			
+			strcat(tosend, "\n");
+		
+			checkz = true;
+		}
+	}
+	
+	return checkz;
+
+}
+
+else if(client_message[0]=='f'){
+			if(findFile(client_message)){
+				puts("found");
+				send(sock, "right", 5, 0);
+				recv(sock, client_message, 5000, 0);
+				puts("sending logs");
+				send(sock, tosend, strlen(tosend), 0);
+			}
+			else {
+				puts("sending wrong");
+				send(sock, "wrong", 5, 0);
+			}
+		}
+```
+
+client.c
+```c
+else if(strcmp(choice2, "find")==0){
+    		strcpy(sended, "f ");
+    		printf("What would you like to find: ");
+    		scanf("%s", temp);
+    		strcat(sended, temp);
+    		
+    		if( send(sock, sended, strlen(sended), 0) < 0)
+		    {
+		        puts("Send failed");
+		        return 1;
+		    }
+		    
+		    if( recv(sock, server_reply , 5000 , 0) < 0)
+			{
+				puts("recv failed");
+			}
+			char sumn[10];
+			strcpy(sumn, server_reply);
+			
+			if(strcmp(sumn, "wrong")==0){
+				puts("Tidak ditemukan.\n");
+				goto screen2;
+			}
+			else{
+				send(sock, "go", 2, 0);
+				if( recv(sock, server_reply , 5000 , 0) < 0)
+				{
+					puts("recv failed");
+				}
+				printf("%s\n", server_reply);
+				goto screen2;
+			}
+    	}
+```
+
+- Pertama kita mengirim ke server terms yang ingin dicari.
+- Di server, kita menggunakan strstr di dalam array database nama file, dan jika ditemukan yang mengandung terms, kita kirim semua yang mengandung terms nya sesuai format kembali ke client untuk ditunjukkan.
+- Jika tidak ada, kita bilang tidak ada.
+
+**(h)**
+server.c
+```c
+FILE *filez1;
+filez1 = fopen("running.log", "a+");
+fprintf(filez1, "Tambah : %s (%s)\n", filed[filecount], logined);
+fclose(filez1);
+
+filez1 = fopen("running.log", "a+");
+fprintf(filez1, "Hapus : %s (%s)\n", filed[i], logined);
+fclose(filez1);
+```
+- Saat hapus atau tambah, tinggal append/(tambah jika belum ada). Server selalu menyimpan kredensial yang sedang menggunakan, dan tinggal dimasukkan.
+
 
 ## Soal Nomor 3
 Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa gabutnya, ia memikirkan untuk merapikan sejumlah file yang ada di laptopnya. Karena jumlah filenya terlalu banyak, Alex meminta saran ke Ayub. Ayub menyarankan untuk membuat sebuah program C agar file-file dapat dikategorikan. Program ini akan memindahkan file sesuai ekstensinya ke dalam folder sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan

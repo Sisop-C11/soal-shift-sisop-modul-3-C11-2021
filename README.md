@@ -1008,6 +1008,10 @@ fclose(filez1);
 
 ![image](https://user-images.githubusercontent.com/68369091/119264318-dab73000-bc0c-11eb-8190-ec649a458b6c.png)
 
+## Kendala
+- Sering segmentation fault, dikarenakan kurang memori dan hal-hal yang tidak diketahui.
+- fopen kadang membuat error ketika menggunakan alamat penuh, harus alamat relatif.
+- Hanya mempunyai satu hari karena praktikum saat ETS.
 
 
 ## Soal Nomor 3

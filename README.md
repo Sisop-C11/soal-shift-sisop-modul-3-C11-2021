@@ -584,6 +584,13 @@ if(strcmp(choice2, "add")==0){
 - Di dalam client, kita meminta publisher, tahun publikasi, dan pathfile, lalu kita kirim ke server. Di server, kita masukkan ke dalam file.tsv. Lalu, kita masukkan ke array publishernya, tahun publikasinya, dan pathfile. Lalu, kita process sehingga bisa mendapat nama file dan ekstensi, dan kita masukkan ke array juga.
 - Selanjutnya, di client, akan meng-scan isi dari file yang ingin ditambahkan ke server. Hasil scan dikirim ke server, di mana mereka bisa membuat file baru dengan nama yang sama dan memasukkan isi hasil scan ke dalamnya, sehingga dapat meng-rekreasikan isi file.
 
+
+https://user-images.githubusercontent.com/68369091/119264159-261d0e80-bc0c-11eb-9aff-fb8bc94a67a1.mp4
+
+
+![image](https://user-images.githubusercontent.com/68369091/119264093-eeae6200-bc0b-11eb-982f-60cb9ea81726.png)
+
+
 **(d)**
 server.c
 ```c
@@ -686,6 +693,8 @@ else if(strcmp(choice2, "download")==0){
 - Sama persis dengan 1c, namun kebalikan saja. Client mengambil hasil scan dan membuat ulang file tersebut.
 - Jika tidak ada di server, kita memberitahu ke client bahwa tidak ada.
 
+https://user-images.githubusercontent.com/68369091/119264233-7bf1b680-bc0c-11eb-9b63-c1e968992e6f.mp4
+
 **(e)**
 server.c
 ```c
@@ -778,6 +787,7 @@ else if(strcmp(choice2, "delete")==0){
 - Jika ada di database, server mengganti nama file di server dengan ditambah "old-" di depannya. Lalu menghapus entry nya dalam files.tsv. Untuk melakukan itu, kita mengganti di array sehingga terhapus indeks dengan file tersebut. Lalu, menghapus files.tsv dan membuat baru dengan database baru.
 
 
+
 **(f)**
 server.c
 ```c
@@ -865,6 +875,10 @@ else if(strcmp(choice2, "see")==0){
 ```
 
 - Untuk see, kita tinggal mengirim isi array database yang kita punya dan sudah kita process dari sebelumnya, dan mengirimnya ke client.
+
+![image](https://user-images.githubusercontent.com/68369091/119264279-a9d6fb00-bc0c-11eb-8c49-3ab8cbe0875c.png)
+
+
 
 **(g)**
 server.c
@@ -973,6 +987,11 @@ else if(strcmp(choice2, "find")==0){
 - Di server, kita menggunakan strstr di dalam array database nama file, dan jika ditemukan yang mengandung terms, kita kirim semua yang mengandung terms nya sesuai format kembali ke client untuk ditunjukkan.
 - Jika tidak ada, kita bilang tidak ada.
 
+![image](https://user-images.githubusercontent.com/68369091/119264294-bf4c2500-bc0c-11eb-8775-6d70e9647c92.png)
+
+![image](https://user-images.githubusercontent.com/68369091/119264299-c83cf680-bc0c-11eb-83ef-03c2426c36cb.png)
+
+
 **(h)**
 server.c
 ```c
@@ -986,6 +1005,9 @@ fprintf(filez1, "Hapus : %s (%s)\n", filed[i], logined);
 fclose(filez1);
 ```
 - Saat hapus atau tambah, tinggal append/(tambah jika belum ada). Server selalu menyimpan kredensial yang sedang menggunakan, dan tinggal dimasukkan.
+
+![image](https://user-images.githubusercontent.com/68369091/119264318-dab73000-bc0c-11eb-8190-ec649a458b6c.png)
+
 
 
 ## Soal Nomor 3

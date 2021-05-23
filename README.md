@@ -636,6 +636,16 @@ else if(client_message[0]=='d'){
 ```
 client.c
 ```c
+void takeFile(char msg[], char namez[]){
+  	char totalfile[1024];
+  	strcpy(totalfile, namez);
+  	
+	FILE *fp;
+	fp = fopen (totalfile, "w");
+	fprintf(fp, "%s", msg);
+	fclose(fp);
+	puts("File terdownload");
+}
 
 else if(strcmp(choice2, "download")==0){
     		strcpy(sended, "d ");
@@ -671,6 +681,106 @@ else if(strcmp(choice2, "download")==0){
 			}
 		    goto screen2;
     	}
+```
+- Untuk download, client mengirim nama file. Lalu, di server, akan dicek dengan array database jika ada tidak. Jika ada, kita meng-scan isi file dan mengirimnya ke client.
+- Sama persis dengan 1c, namun kebalikan saja. Client mengambil hasil scan dan membuat ulang file tersebut.
+- Jika tidak ada di server, kita memberitahu ke client bahwa tidak ada.
+
+**(e)**
+server.c
+```c
+bool deleteFile(char msg[]){
+	char fullz[strlen(msg)];
+	memset(fullz, 0, strlen(msg));
+	for(int i=2; i<strlen(msg); i++){
+		fullz[i-2]=msg[i];
+	}
+	
+	for(int i=0; i<filecount; i++){
+		if(strcmp(fullz, filed[i])==0){
+			char newname[300] = {0}, oldname[300] = {0};
+			sprintf(newname, "/home/solxius/Desktop/Sisop/Modul3/Server/FILES/old-%s", filed[i]);
+			sprintf(oldname, "/home/solxius/Desktop/Sisop/Modul3/Server/FILES/%s", filed[i]);
+			rename(oldname, newname);
+			
+			filecount--;
+			for (int j=i; j<filecount; j++){
+				strcpy(filea[j], filea[j+1]);
+				strcpy(fileb[j], fileb[j+1]);
+				strcpy(filec[j], filec[j+1]);
+				strcpy(filed[j], filed[j+1]);
+				strcpy(filee[j], filee[j+1]);
+			}
+			
+			remove("files.tsv");
+			FILE *tsvmake;
+			tsvmake = fopen("files.tsv", "a+");
+			for (int j=0; j<filecount; j++){
+				fprintf(tsvmake, "%s\t%s\t%s\n", filea[j], fileb[j], filec[j]);
+			}
+			fclose(tsvmake);
+			
+			FILE *filez1;
+			filez1 = fopen("running.log", "a+");
+			fprintf(filez1, "Hapus : %s (%s)\n", filed[i], logined);
+			fclose(filez1);
+			
+			return true;
+		}
+	}
+	puts("false");
+	return false;
+	
+}
+
+else if(client_message[0]=='z'){
+			if(deleteFile(client_message)){
+				puts("sending right");
+				send(sock, "right", 5, 0);
+			}
+			else{
+				puts("sending wrong");
+				send(sock, "wrong", strlen("wrong"), 0);
+			}
+		}
+```
+
+client.c
+```c
+else if(strcmp(choice2, "delete")==0){
+    		strcpy(sended, "z ");
+    		printf("What file would you like to delete: ");
+    		scanf("%s", temp);
+    		strcat(sended, temp);
+    		
+    		if( send(sock, sended, strlen(sended), 0) < 0)
+		    {
+		        puts("Send failed");
+		        return 1;
+		    }
+    		if( recv(sock, server_reply , 5000 , 0) < 0)
+			{
+				puts("recv failed");
+			}
+			
+			if(strcmp(server_reply, "wrong")==0){
+				puts("Tidak ada file tersebut.\n");
+				goto screen2;
+			}
+			else{
+				puts("File telah dihapus.\n");
+				goto screen2;
+			}
+    	}
+```
+
+- Pertama, client mengirim nama file ke server yang ingin di-delete, dengan simbol z supaya server tahu ini untuk delete.
+- Jika ada di database, server mengganti nama file di server dengan ditambah "old-" di depannya. Lalu menghapus entry nya dalam files.tsv. Untuk melakukan itu, kita mengganti di array sehingga terhapus indeks dengan file tersebut. Lalu, menghapus files.tsv dan membuat baru dengan database baru.
+
+
+**(f)**
+```c
+
 ```
 
 ## Soal Nomor 3

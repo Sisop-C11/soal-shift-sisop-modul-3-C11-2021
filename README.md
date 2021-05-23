@@ -22,51 +22,54 @@ id2:password2
 **(c)** Tidak hanya itu, Keverk juga diminta membuat fitur agar client dapat menambah file baru ke dalam server. Direktori FILES memiliki struktur direktori di bawah ini : 
 
 Direktori FILES 
+```
 File1.ekstensi
 File2.ekstensi
-
+```
 
 Pertama client mengirimkan input ke server dengan struktur sebagai berikut :
 		Contoh Command Client :
-		
+```		
 add
-
+```
 
 			
 
 		Output Client Console:
-		
+```		
 Publisher:
 Tahun Publikasi:
 Filepath:
-
+```
 
 Kemudian, dari aplikasi client akan dimasukan data buku tersebut (perlu diingat bahwa Filepath ini merupakan path file yang akan dikirim ke server). Lalu client nanti akan melakukan pengiriman file ke aplikasi server dengan menggunakan socket. Ketika file diterima di server, maka row dari files.tsv akan bertambah sesuai dengan data terbaru yang ditambahkan.
 
 **(d)** Dan client dapat mendownload file yang telah ada dalam folder FILES di server, sehingga sistem harus dapat mengirim file ke client. Server harus melihat dari files.tsv untuk melakukan pengecekan apakah file tersebut valid. Jika tidak valid, maka mengirimkan pesan error balik ke client. Jika berhasil, file akan dikirim dan akan diterima ke client di folder client tersebut. 
 
 Contoh Command client
+```
 download TEMPfile.pdf
-
+```
 
 
 **(e)** Setelah itu, client juga dapat menghapus file yang tersimpan di server. Akan tetapi, Keverk takut file yang dibuang adalah file yang penting, maka file hanya akan diganti namanya menjadi ‘old-NamaFile.ekstensi’. Ketika file telah diubah namanya, maka row dari file tersebut di file.tsv akan terhapus.
 
 Contoh Command Client:
-
+```
 delete TEMPfile.pdf
-
+```
 
 
 **(f)** Client dapat melihat semua isi files.tsv dengan memanggil suatu perintah yang bernama see. Output dari perintah tersebut keluar dengan format. 
 
 Contoh Command Client :
-
+```
 see
-
+```
 
 
 Contoh Format Output pada Client:
+```
 Nama:
 Publisher:
 Tahun publishing:
@@ -78,22 +81,23 @@ Publisher:
 Tahun publishing:
 Ekstensi File : 
 Filepath : 
-
-
+```
 
 
 **(g)** Aplikasi client juga dapat melakukan pencarian dengan memberikan suatu string. Hasilnya adalah semua nama file yang mengandung string tersebut. Format output seperti format output f.
 
 Contoh Client Command:
-
+```
 find TEMP
-
+```
 
 **(h)** Dikarenakan Keverk waspada dengan pertambahan dan penghapusan file di server, maka Keverk membuat suatu log untuk server yang bernama running.log. Contoh isi dari log ini adalah
 
 running.log
+```
 Tambah : File1.ektensi (id:pass)
 Hapus : File2.ektensi (id:pass)
+```
 
 
 
@@ -105,7 +109,7 @@ Untuk download dan upload silahkan menggunakan file teks dengan ekstensi dan isi
 
 
 Struktur Direktori:
-
+```
 .
 ├── Client
 │   ├── client.c
@@ -119,6 +123,7 @@ Struktur Direktori:
     └── FILES
             ├── File2.extensi
             └── File1.ekstensi
+```
 
 ## Jawaban Soal Nomor 1
 **(a)**

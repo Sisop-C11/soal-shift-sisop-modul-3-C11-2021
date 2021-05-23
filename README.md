@@ -461,8 +461,13 @@ Opsi ini akan mengkategorikan seluruh file yang ada di working directory ketika 
 Namun karena Ayub adalah orang yang hanya bisa memberi ide saja, tidak mau bantuin buat bikin programnya, Ayub meminta bantuanmu untuk membuatkan programnya. Bantulah agar program dapat berjalan!
 
 Catatan: 
+
 -Kategori folder tidak dibuat secara manual, harus melalui program C
+
 -Program ini tidak case sensitive. Contoh: JPG dan jpg adalah sama
+
 -Jika ekstensi lebih dari satu (contoh “.tar.gz”) maka akan masuk ke folder dengan titik terdepan (contoh “tar.gz”)
+
 -Dilarang juga menggunakan fork-exec dan system()
+
 -Bagian b dan c berlaku rekursif

@@ -431,6 +431,7 @@ Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa gabutny
 
 **(a)** Program menerima opsi -f seperti contoh di atas, jadi pengguna bisa menambahkan argumen file yang bisa dikategorikan sebanyak yang diinginkan oleh pengguna. 
 Output yang dikeluarkan adalah seperti ini :
+
 File 1 : Berhasil Dikategorikan (jika berhasil)
 File 2 : Sad, gagal :( (jika gagal)
 File 3 : Berhasil Dikategorikan

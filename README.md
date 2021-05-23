@@ -829,3 +829,55 @@ Catatan:
 * Dilarang juga menggunakan fork-exec dan system()
 
 * Bagian b dan c berlaku rekursif
+
+## Jawaban Nomor 3
+**(a)**
+```
+if (strcmp(argv[1], "-f") == 0) {
+    if (argc <= 2) {
+      printf("Argument salah\n");
+      exit(1);
+    }
+
+    pthread_t tid[argc-2];
+    for (int i = 2; i < argc; i++) {
+      pthread_create(&tid[i-2], NULL, &routine, (void *)argv[i]);
+    }
+    for (int i = 2; i < argc; i++) {
+      pthread_join(tid[i-2], NULL);
+    }
+    exit(0);
+  }
+```
+
+**(b)**
+```
+if (strcmp(argv[1], "-d") == 0) {
+    if (argc != 3) {
+      printf("Argument salah\n");
+      exit(1);
+    }
+    DIR* dir = opendir(argv[2]);
+    if (dir) {
+      directory = argv[2];
+    } else if (ENOENT == errno) {
+      printf("Directory tidak ada\n");
+      exit(1);
+    }
+    closedir(dir);
+  }
+```
+
+**(c)**
+```
+ char *directory;
+  if (strcmp(argv[1], "*") == 0) {
+    if (argc != 2) {
+      printf("Argument salah\n");
+      exit(1);
+    }
+    char buff[1337];
+    getcwd(buff, sizeof(buff));
+    directory = buff;
+  }
+```

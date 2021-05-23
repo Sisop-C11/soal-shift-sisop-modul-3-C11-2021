@@ -1012,6 +1012,227 @@ fclose(filez1);
 
 ![image](https://user-images.githubusercontent.com/68369091/119264728-7dbc7980-bc0e-11eb-8ecf-656ebac175cd.png)
 
+## Soal Nomor 2
+Crypto (kamu) adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kewalahan mengerjakan tugas dari bosnya. Karena Crypto adalah orang yang sangat menyukai tantangan, dia ingin membantu Loba mengerjakan tugasnya. Detil dari tugas tersebut adalah:
+
+**(a)** Membuat program perkalian matrix (4x3 dengan 3x6) dan menampilkan hasilnya. Matriks nantinya akan berisi angka 1-20 (tidak perlu dibuat filter angka).
+
+**(b)** Membuat program dengan menggunakan matriks output dari program sebelumnya (program soal2a.c) (**Catatan!**: gunakan shared memory). Kemudian matriks tersebut akan dilakukan perhitungan dengan matrix baru (input user) sebagai berikut contoh perhitungan untuk matriks yang a	da. Perhitungannya adalah setiap cel yang berasal dari matriks A menjadi angka untuk faktorial, lalu cel dari matriks B menjadi batas maksimal faktorialnya matri(dari paling besar ke paling kecil) (**Catatan!**: gunakan thread untuk perhitungan di setiap cel). 
+**Ketentuan**
+
+```
+if a >= b -> a! / (a - b)!
+if b > a -> a!
+if 0 -> 0
+```
+
+**(c)** Karena takut lag dalam pengerjaannya membantu Loba, Crypto juga membuat program (soal2c.c) untuk mengecek 5 proses teratas apa saja yang memakan resource komputernya dengan command `ps aux | sort -nrk 3,3 | head -5` (**Catatan!**: Harus menggunakan IPC Pipes)
+
+## Jawaban Nomor 2
+**(a)** Untuk soal nomor **2(a)** yang pertama dilakukan adalah membuat sebuah matriks yang nantinya akan disimpan ke dalam *shared memory*. Caranya adalah sebagai berikut.
+
+```c
+key_t key = 1234;
+int (*hasil)[6];
+
+int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+hasil = shmat(shmid, NULL, 0);
+```
+
+Setelah membuat *shared memory* untuk matriks hasil, lalu buat program untuk melakukan perkalian matriks dan memasukkannya ke dalam matriks hasil yang sudah dibuat *shared memory*-nya. Programnya sebagai berikut.
+
+```c
+printf("Masukkan nilai matriks 1:\n");
+for (row = 0; row < 4; row++) {
+    for (col = 0; col < 3; col++) {
+            scanf("%d", &matriks1[row][col]);
+    }
+}
+
+printf("\nMasukkan nilai matriks 2:\n");
+for (row = 0; row < 3; row++) {
+    for (col = 0; col < 6; col++) {
+            scanf("%d", &matriks2[row][col]);
+    }
+}
+
+printf("\nNilai matriks hasil perkalian:\n");
+for (row = 0; row < 4; row++) {
+    for (col = 0; col < 6; col++) {
+        int val = 0;
+        for (temp = 0; temp < 3; temp++) {
+                val += matriks1[row][temp] * matriks2[temp][col];
+        }
+        hasil[row][col] = val;
+        printf("%d ", val);
+    }
+    puts("");
+}
+```
+
+**(b)** Untuk soal **2(b)**, matriks hasil dari soal **2(a)** dilakukan operasi factorial dengan batasan tertentu. Yang pertama dilakukan adalah memanggil *shared memory* yang telah dibuat di program sebelumnya.
+
+```c
+key_t key = 1234;
+int (*hasil)[6];
+
+int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+hasil = shmat(shmid, NULL, 0);
+```
+
+Setelah itu, pindahkan isi matriks hasil ke matriks lain agar ketika matriks hasil sudah di-*detach*, isinya masih bisa digunakan.
+
+```c
+printf("Matriks A:\n");
+for (row = 0; row < 4; row++) {
+    for (col = 0; col < 6; col++) {
+        matriks1[row][col] = hasil[row][col];
+        printf("%d ", matriks1[row][col]);
+    }
+    puts("");
+}
+puts("");
+```
+
+Setelah itu, dapatkan matriks yang akan digunakan sebagai batasannya.
+
+```c
+printf("Masukkan nilai matriks B:\n");
+for (row = 0; row < 4; row++) {
+    for (col = 0; col < 6; col++) {
+        scanf("%d", &matriks2[row][col]);
+    }
+}
+```
+
+Lalu buat thread untuk melakukan operasi untuk tiap baris matriksnya. Karena matriksnya memiliki 4 baris, maka buat 4 thread.
+
+```c
+for (i = 0; i < 4; i++) {
+    err = pthread_create(&(tid[i]), NULL, &count_thread, NULL);
+}
+pthread_join(tid[0], NULL);
+pthread_join(tid[1], NULL);
+pthread_join(tid[2], NULL);
+pthread_join(tid[3], NULL);
+```
+
+Untuk fungsi dari threadnya sendiri adalah sebagai berikut.
+
+```c
+void* count_thread (void* argv) {
+    pthread_t id = pthread_self();
+    int it;
+
+    if (pthread_equal(id, tid[0])) {
+        for (it = 0; it < 6; it++) {
+            matriks_hasil[0][it] = count(matriks1[0][it], matriks2[0][it]);
+        }
+    } else if (pthread_equal(id, tid[1])) {
+        for (it = 0; it < 6; it++) {
+            matriks_hasil[1][it] = count(matriks1[1][it], matriks2[1][it]);
+        }
+    } else if (pthread_equal(id, tid[2])) {
+        for (it = 0; it < 6; it++) {
+            matriks_hasil[2][it] = count(matriks1[2][it], matriks2[2][it]);
+        }
+    } else if (pthread_equal(id, tid[3])) {
+        for (it = 0; it < 6; it++) {
+            matriks_hasil[3][it] = count(matriks1[3][it], matriks2[3][it]);
+        }
+    }
+
+    return NULL;
+}
+```
+
+Lalu buat fungsi untuk menetapkan batasannya (untuk batasannya ada pada soal).
+
+```c
+ll count (int val1, int val2) {
+    if (val1 == 0 || val2 == 0) return 0;
+    else if (val1 >= val2) return fact(val1) / fact(val1 - val2);
+    else return fact(val1);
+}
+```
+
+Selanjutnya buat fungsi untuk menjalankan factorial.
+
+```c
+ll fact (int num) {
+    if (num == 1 || num == 0) return 1;
+    return num * fact(num - 1);        
+}
+```
+
+Yang terakhir adalah menampilkan hasil dari operasi factorial.
+
+```c
+printf("Hasil perhitungan:\n");
+    for (row = 0; row < 4; row++) {
+        for (col = 0; col < 6; col++) {
+            printf("%lld ", matriks_hasil[row][col]);
+        }
+        puts("");
+    }
+```
+
+**(c)** Pada soal **2(c)**, dibutuhkan pipe untuk menjalankan programnya. Sebelum itu, buat array untuk command yang akan dilakukan.
+
+```c
+char* cmd1[] = {"ps", "aux", NULL};
+char* cmd2[] = {"sort", "-nrk", "3,3", NULL};
+char* cmd3[] = {"head", "-5", NULL};
+```
+
+Setelah itu buat pipe1 dengan perintah `pipe(pipe1)`. Lalu `fork()` dan jalankan fungsi `exec1()`. Pada `exec1`, command pertama akan dijalankan dan hasilnya akan disimpan ke dalam `pipe1`. Programnya adalah sebagai berikut.
+
+```c
+void exec1 () {
+	dup2(pipe1[1], 1);
+
+	close(pipe1[0]);
+	close(pipe1[1]);
+
+	execv("/bin/ps", cmd1);
+}
+```
+
+Setelah itu, buat pipe2 dengan perintah `pipe(pipe2)` dan `fork()` serta jalankan fungsi `exec2()`. Pada `exec2()`, command dua akan dijalankan dan akan menerima input dari `pipe1` serta akan menghasilkan output ke `pipe2`. Programnya adalah sebagai berikut.
+
+```c
+void exec2 () {
+	dup2(pipe1[0], 0);
+	dup2(pipe2[1], 1);
+
+	close(pipe1[0]);
+	close(pipe1[1]);
+	close(pipe2[0]);
+	close(pipe2[1]);
+
+	execv("/bin/sort", cmd2);
+}
+```
+
+Selanjutnya tutup `pipe1` karena sudah tidak digunakan.
+
+```c
+close(pipe1[0]);
+close(pipe1[1]);
+```
+
+Setelah itu buat `fork()` dan jalankan fungsi `exec3()`. Fungsi `exec3()` menjalankan command tiga yang menerima input dari `pipe2`. Programnya adalah sebagai berikut.
+
+```c
+void exec3 () {
+	dup2(pipe2[0], 0);
+
+	close(pipe2[0]);
+	close(pipe2[1]);
+
+	execv("/bin/head", cmd3);
+}
+```
 
 ## Soal Nomor 3
 Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa gabutnya, ia memikirkan untuk merapikan sejumlah file yang ada di laptopnya. Karena jumlah filenya terlalu banyak, Alex meminta saran ke Ayub. Ayub menyarankan untuk membuat sebuah program C agar file-file dapat dikategorikan. Program ini akan memindahkan file sesuai ekstensinya ke dalam folder sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan

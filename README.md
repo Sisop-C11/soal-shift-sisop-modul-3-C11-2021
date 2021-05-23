@@ -433,15 +433,20 @@ Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa gabutny
 Output yang dikeluarkan adalah seperti ini :
 
 File 1 : Berhasil Dikategorikan (jika berhasil)
+
 File 2 : Sad, gagal :( (jika gagal)
+
 File 3 : Berhasil Dikategorikan
 
 **(b)** Program juga dapat menerima opsi -d untuk melakukan pengkategorian pada suatu directory. Namun pada opsi -d ini, user hanya bisa memasukkan input 1 directory saja, tidak seperti file yang bebas menginput file sebanyak mungkin. Contohnya adalah seperti ini:
+
 $ ./soal3 -d /path/to/directory/
 
 Perintah di atas akan mengkategorikan file di /path/to/directory, lalu hasilnya akan disimpan di working directory dimana program C tersebut berjalan (hasil kategori filenya bukan di /path/to/directory).
 Output yang dikeluarkan adalah seperti ini :
+
 Jika berhasil, print “Direktori sukses disimpan!”
+
 Jika gagal, print “Yah, gagal disimpan :(“
 
 **(c)** Selain menerima opsi-opsi di atas, program ini menerima opsi *, contohnya ada di bawah ini:

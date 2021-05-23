@@ -239,5 +239,136 @@ recv(sock , server_reply , 1024 , 0);
 
 
 ![image](https://user-images.githubusercontent.com/68369091/119257547-e21c1080-bbef-11eb-99bc-6154755358e3.png)
+![image](https://user-images.githubusercontent.com/68369091/119257576-07a91a00-bbf0-11eb-9915-da389b2ea244.png)
+
+client.c
+```c
+screen1:
+    printf("1. Login\n2. Register\nEnter your choice (1/2) : ");
+    scanf("%d", &choice);
+    if(choice == 1)
+    {
+    	strcpy(username, "l ");
+        printf("Username : ");
+        getchar();
+        scanf("%s", temp);
+        strcat(username, temp);
+        printf("Password : ");
+        getchar();
+        scanf("%s", pass);
+        strcat(username, ":");
+        strcat(username, pass);
+        send(sock, username, strlen(username), 0);
+        memset(server_reply, 0, 5000);
+        if( recv(sock, server_reply, 1024 , 0) < 0)
+		{
+			puts("recv failed");
+		}
+        if(strcmp(server_reply, "success")==0)
+        {
+            printf("login success\n");
+            send(sock, "sukses", 6, 0);
+            goto screen2;
+        }
+        else if(strcmp(server_reply, "failure")==0)
+        {
+            printf("login failed\n");
+            goto screen1;
+        }
+    }
+    else if(choice == 2)
+    {
+        strcpy(username, "r ");
+        printf("Username : ");
+        getchar();
+        scanf("%s", temp);
+        strcat(username, temp);
+        printf("Password : ");
+        getchar();
+        scanf("%s", pass);
+        strcat(username, ":");
+        strcat(username, pass);
+        if( send(sock , username , strlen(username) , 0) < 0)
+        {
+            puts("Send failed");
+            return 1;
+        }
+        memset(server_reply, 0, 1024);
+        if( recv(sock , server_reply , 1024 , 0) < 0)
+		{
+			puts("recv failed");
+		}
+        printf("%s\n", server_reply);
+        goto screen1;
+    }
+    else
+    {
+        printf("invalid input\n");
+        goto screen1;
+    }
+```
+
+```c
+void registerAccount(char msg[]){
+	for(int i=2; i<strlen(msg); i++){
+		akuns[akuncount][i-2]=msg[i];
+	}
+	akuncount++;
+	FILE *fp;
+	fp = fopen ("akun.txt", "a");
+	fprintf(fp, "%s\n", akuns[akuncount-1]);
+	fclose(fp);
+}
+
+bool loginAccount(char msg[]){
+	char checker[strlen(msg)-1];
+	memset(checker, 0, strlen(msg)-1);
+	for(int i=2; i<strlen(msg); i++){
+		checker[i-2]=msg[i];
+	}
+	for(int j=0; j<akuncount; j++){
+		if(strcmp(akuns[j], checker)==0){
+			strcpy(logined, checker);
+			return true;
+		}
+	}
+	return false;
+}
+
+if(client_message[0]=='r'){
+	registerAccount(client_message);
+	send(sock, "registered", 10, 0 );
+}
+else if(client_message[0]=='l'){
+	bool yo = loginAccount(client_message);
+	if(yo){
+		send(sock, "success", 10, 0 );
+	}
+	else{
+		send(sock, "failure", 10, 0 );
+	}
+}
+```
+
+- Dari client, untuk register, kita mengirimkan isi username dan password ke server dengan simbol r, untuk membilang ke server bahwa kita ingin register. Lalu, server memasukkan ke database dan akun.txt isi dari username dan password baru.
+- Untuk login, client mengirim username dan password ke server dengan simbol l, untuk embilang ke server bahwa kita ingin login. Server akan membandingkan dengan database, dan jika benar, memberitahu ke client bahwa credentials benar, sehingga client pindah ke screen baru.
 
 
+https://user-images.githubusercontent.com/68369091/119258208-ebf34300-bbf2-11eb-936a-8a0c4de1a066.mp4
+
+https://user-images.githubusercontent.com/68369091/119258224-fc0b2280-bbf2-11eb-90de-cc0085687d95.mp4
+
+
+```c
+FILE *filez;
+char perfile[1024];
+filez = fopen("akun.txt", "a+");
+if(filez == NULL) exit(0);
+while(fscanf(filez, "%s\n", perfile) != EOF)
+{
+      strcpy(akuns[akuncount], perfile);
+      akuncount++;
+}
+fclose(filez)
+```
+- Ini untuk menyimpan ke database username dan password yang sudah disimpan di akun.txt di sesi sebelumnya.

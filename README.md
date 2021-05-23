@@ -787,6 +787,8 @@ else if(strcmp(choice2, "delete")==0){
 - Jika ada di database, server mengganti nama file di server dengan ditambah "old-" di depannya. Lalu menghapus entry nya dalam files.tsv. Untuk melakukan itu, kita mengganti di array sehingga terhapus indeks dengan file tersebut. Lalu, menghapus files.tsv dan membuat baru dengan database baru.
 
 
+https://user-images.githubusercontent.com/68369091/119264632-30d8a300-bc0e-11eb-9174-022ecc8e58c2.mp4
+
 
 **(f)**
 server.c
@@ -991,6 +993,8 @@ else if(strcmp(choice2, "find")==0){
 
 ![image](https://user-images.githubusercontent.com/68369091/119264299-c83cf680-bc0c-11eb-83ef-03c2426c36cb.png)
 
+![image](https://user-images.githubusercontent.com/68369091/119264318-dab73000-bc0c-11eb-8190-ec649a458b6c.png)
+
 
 **(h)**
 server.c
@@ -1006,8 +1010,7 @@ fclose(filez1);
 ```
 - Saat hapus atau tambah, tinggal append/(tambah jika belum ada). Server selalu menyimpan kredensial yang sedang menggunakan, dan tinggal dimasukkan.
 
-![image](https://user-images.githubusercontent.com/68369091/119264318-dab73000-bc0c-11eb-8190-ec649a458b6c.png)
-
+![image](https://user-images.githubusercontent.com/68369091/119264728-7dbc7980-bc0e-11eb-8ecf-656ebac175cd.png)
 
 
 ## Soal Nomor 3

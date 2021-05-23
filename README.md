@@ -423,8 +423,255 @@ fclose(filez)
 		}
 
     fclose(tsvmake);
+    
+    int result = mkdir("/home/solxius/Desktop/Sisop/Modul3/Server/FILES", 0777);
 ```
+- Di sini, file.tsv dibuat. Jika sebelumnya ada, kita memasukkan isinya ke dalam array. 
+- Lalu, dibuat direktori FILES jika belum ada.
+
 https://user-images.githubusercontent.com/68369091/119258609-a899d400-bbf4-11eb-9baf-c992d04fe801.mp4
+
+**(c)**
+server.c
+```c
+void addFile(char msg[]){
+	char fullz[strlen(msg)];
+	memset(fullz, 0, strlen(msg));
+	for(int i=2; i<strlen(msg); i++){
+		fullz[i-2]=msg[i];
+	}
+
+	FILE *tsvmake;
+    tsvmake = fopen("files.tsv", "a");
+    fprintf(tsvmake, "%s", fullz);
+    
+    char aa[50], bb[50], cc[100], dd[50], ee[50];
+    memset(aa, 0, 50);
+    memset(bb, 0, 50);
+    memset(cc, 0, 100);
+    memset(dd, 0, 50);
+    memset(ee, 0, 50);
+    	
+    	sscanf(fullz, "%s\t%s\t%s\n", aa, bb, cc);
+		strcpy(filea[filecount], aa);
+		strcpy(fileb[filecount], bb);
+		strcpy(filec[filecount], cc);
+		printf("%s\n", filec[filecount]);
+		
+		int dcounter = 0;
+		    for(int i=0; i<strlen(cc); i++){
+		    	if(cc[i]=='/'){
+		    		memset(dd, 0, 50);
+		    		dcounter=0;
+		    		continue;
+		    	}
+		    	dd[dcounter]=cc[i];
+		    	dcounter++;
+		    }
+			
+			strcpy(filed[filecount], dd);
+			
+			int ecounter = 0;
+		    for(int i=0; i<strlen(dd); i++){
+		    	if(dd[i]=='.'){
+		    		memset(ee, 0, 50);
+		    		ecounter=0;
+		    		continue;
+		    	}
+		    	ee[ecounter]=dd[i];
+		    	ecounter++;
+		    }
+			
+			strcpy(filee[filecount], ee);
+			
+	
+    fclose(tsvmake); 
+   
+    FILE *filez1;
+	filez1 = fopen("running.log", "a+");
+	fprintf(filez1, "Tambah : %s (%s)\n", filed[filecount], logined);
+	fclose(filez1);
+			   
+	filecount++;
+    return;   
+}
+
+void takeFile(char msg[], char namez[]){
+ 	const char ch = '/';
+  	char *ret;
+  	char aa[100];
+  	memset(aa, 0, 100);
+
+  	ret = strrchr(namez, ch);
+  	for(int j=1; j<strlen(ret); j++){
+			aa[j-1]=ret[j];
+	}
+  	
+  	char totalfile[100];
+  	strcpy(totalfile, "/home/solxius/Desktop/Sisop/Modul3/Server/FILES/");
+  	strcat(totalfile, aa);
+  	
+	FILE *fp;
+	fp = fopen (totalfile, "w");
+	fprintf(fp, "%s", msg);
+	fclose(fp);
+}
+
+else if(client_message[0]=='a'){
+	addFile(client_message);
+	char namez[1024];
+	strcpy(namez, client_message);
+	memset(client_message, 0, 1024);
+	send(sock, "adding file", 11, 0 );
+	recv(sock, client_message, 5000, 0);
+	takeFile(client_message, namez);
+	send(sock, "file added", 10, 0 );
+}
+```
+
+client.c
+```c
+if(strcmp(choice2, "add")==0){
+    		strcpy(sended, "a \n");
+    		printf("Publisher: ");
+    		scanf("%s", temp);
+    		strcat(sended, temp);
+    		strcat(sended, "\t");
+    		printf("Tahun publikasi: ");
+    		scanf("%s", temp);
+    		strcat(sended, temp);
+    		strcat(sended, "\t");
+    		printf("Filepath: ");
+    		scanf("%s", temp);
+    		strcat(sended, temp);
+    		if( send(sock, sended, strlen(sended), 0) < 0)
+		    {
+		        puts("Send failed");
+		        return 1;
+		    }
+		    if( recv(sock , server_reply , 1024 , 0) < 0)
+			{
+				puts("recv failed");
+			}
+		    printf("%s\n", server_reply);
+		    
+		    FILE *filez;
+			char perline[1024], perfile[5000];
+			memset(perfile, 0, 5000);
+			memset(perline, 0, 1024);
+			filez = fopen(temp, "a+");
+			while(fscanf(filez, "%[^\n]\n", perline) != EOF)
+			{
+				strcat(perfile, perline);
+				strcat(perfile, "\n");
+			}
+			fclose(filez);
+			
+			if( send(sock, perfile, strlen(perfile), 0) < 0)
+		    {
+		        puts("Send failed");
+		        return 1;
+		    }
+		    if( recv(sock , server_reply , 1024 , 0) < 0)
+			{
+				puts("recv failed");
+			}
+		    printf("%s\n", server_reply);
+		    
+		    goto screen2;
+    	}
+``` 
+- Di dalam client, kita meminta publisher, tahun publikasi, dan pathfile, lalu kita kirim ke server. Di server, kita masukkan ke dalam file.tsv. Lalu, kita masukkan ke array publishernya, tahun publikasinya, dan pathfile. Lalu, kita process sehingga bisa mendapat nama file dan ekstensi, dan kita masukkan ke array juga.
+- Selanjutnya, di client, akan meng-scan isi dari file yang ingin ditambahkan ke server. Hasil scan dikirim ke server, di mana mereka bisa membuat file baru dengan nama yang sama dan memasukkan isi hasil scan ke dalamnya, sehingga dapat meng-rekreasikan isi file.
+
+**(d)**
+server.c
+```c
+bool downloadFile(char msg[]){
+	char fullz[strlen(msg)];
+	memset(fullz, 0, strlen(msg));
+	for(int i=2; i<strlen(msg); i++){
+		fullz[i-2]=msg[i];
+	}
+	puts("beforehere");
+	
+	for(int i=0; i<filecount; i++){
+		if(strcmp(fullz, filed[i])==0){
+			char pathz[200];
+			strcpy(pathz, "FILES/");
+			strcat(pathz, fullz);
+			FILE *filez;
+			char perline[1024];
+			memset(tosend, 0, 5000);
+			memset(perline, 0, 1024);
+			puts("untilhere");
+			filez = fopen(pathz, "a+");
+			while(fscanf(filez, "%[^\n]\n", perline) != EOF)
+			{
+				strcat(tosend, perline);
+				strcat(tosend, "\n");
+			}
+			fclose(filez);
+			puts("enduntilhere");
+			return true;
+		}
+	}
+	puts("false");
+	return false;
+	
+}
+
+else if(client_message[0]=='d'){
+			if(downloadFile(client_message)){
+				send(sock, "right", 5, 0);
+				recv(sock, client_message, 5000, 0);
+				puts("sending message");
+				send(sock, tosend, strlen(tosend), 0);
+			}
+			else{
+				puts("sending wrong");
+				send(sock, "wrong", strlen("wrong"), 0);
+			}
+		}
+```
+client.c
+```c
+
+else if(strcmp(choice2, "download")==0){
+    		strcpy(sended, "d ");
+    		printf("What file would you like to download: ");
+    		scanf("%s", temp);
+    		strcat(sended, temp);
+   
+    		if( send(sock, sended, strlen(sended), 0) < 0)
+		    {
+		        puts("Send failed");
+		        return 1;
+		    }
+		    if( recv(sock, server_reply , 5000 , 0) < 0)
+			{
+				puts("recv failed");
+			}
+			char sumn[10];
+			strcpy(sumn, server_reply);
+			
+			puts("b4here");
+			if(strcmp(sumn, "wrong")==0){
+				puts("Tidak ada file tersebut.\n");
+				goto screen2;
+			}
+			else{
+				send(sock, "go", 2, 0);
+				if( recv(sock, server_reply , 5000 , 0) < 0)
+				{
+					puts("recv failed");
+				}
+				puts("here");
+				takeFile(server_reply, temp);
+			}
+		    goto screen2;
+    	}
+```
 
 ## Soal Nomor 3
 Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa gabutnya, ia memikirkan untuk merapikan sejumlah file yang ada di laptopnya. Karena jumlah filenya terlalu banyak, Alex meminta saran ke Ayub. Ayub menyarankan untuk membuat sebuah program C agar file-file dapat dikategorikan. Program ini akan memindahkan file sesuai ekstensinya ke dalam folder sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan

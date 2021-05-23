@@ -1082,6 +1082,7 @@ if (strcmp(argv[1], "-f") == 0) {
   }
 ```
 Membuat kategori c
+
 ![image](https://user-images.githubusercontent.com/63457105/119264612-1c94a600-bc0e-11eb-8902-46604d173bff.png)
 
 
@@ -1106,6 +1107,7 @@ if (strcmp(argv[1], "-d") == 0) {
   }
 ```
 hasil :
+
 ![image](https://user-images.githubusercontent.com/63457105/119264627-29b19500-bc0e-11eb-95aa-6944b8196f29.png)
 
 
@@ -1125,6 +1127,7 @@ Jika hanya fungsi if pertama yang terpenuhi, maka program akan set cwd beserta s
   }
 ```
 hasil :
+
 ![image](https://user-images.githubusercontent.com/63457105/119264633-30d8a300-bc0e-11eb-8a7a-ed6042f7792c.png)
 
 Kendala : mengkategorikan file dengan ekstensi lebih dari satu, masalah dengan thread
